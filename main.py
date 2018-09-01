@@ -35,6 +35,9 @@ class Main(object):
         while True:
             try:
                 console_input = input("Song code: ")
+                if console_input == "-":
+                    break
+
                 song_name = main.data['songs'][console_input]
                 song_path = main.songsFolder+u'/'+song_name
                 if Path(main.songsFolder+u'/'+song_name).exists():

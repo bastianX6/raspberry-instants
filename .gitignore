@@ -106,7 +106,7 @@ venv.bak/
 *.DS_Store
 
 # Keys
-Keys/*
+Keys/*.json
 test.sh
 *.mp3
 dot/*
