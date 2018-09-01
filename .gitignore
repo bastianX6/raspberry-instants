@@ -109,3 +109,4 @@ venv.bak/
 Keys/*
 test.sh
 *.mp3
+dot/*
