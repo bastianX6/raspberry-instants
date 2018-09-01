@@ -12,12 +12,6 @@
             "program": "${workspaceFolder}/main.py"
         },
         {
-            "name": "Python: gst.py",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/gst.py"
-        },
-        {
             "name": "Python: Attach",
             "type": "python",
             "request": "attach",
