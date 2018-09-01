@@ -4,3 +4,4 @@ class GstElementNames(object):
     tee = "tee"
     multifilesrc = "multifilesrc"
     decodebin = "decodebin"
+    playbin = "playbin3"

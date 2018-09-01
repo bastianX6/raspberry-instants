@@ -25,15 +25,11 @@ class MediaPlayer(object):
         self.streamingEnded = False
         
 
-    def play_sound(self, fileLocation, onEndPlayingFunction):
+    def play_sound(self, fileLocation):
         self.__create_bin__()
         self.__set_property__("filesrc", "location", fileLocation)
         self.__set_property__("filesrc", "stop-index", 0)
         self.pipeline.set_state(Gst.State.PLAYING)
-        self.onEndPlayingFunction = onEndPlayingFunction
-
-        while not self.streamingEnded:
-            pass
 
     # private methods
 
@@ -116,7 +112,6 @@ class MediaPlayer(object):
             self.__remove_element__(key)
 
         Gst.debug_bin_to_dot_file (self.pipeline,Gst.DebugGraphDetails.ALL, "pipeline_destroyed")
-        self.onEndPlayingFunction()
 
     def __remove_element__(self,element_name):
         element = self.element_list[element_name]
@@ -188,4 +183,3 @@ class MediaPlayer(object):
 
     def __on_error(self, bus, msg):
         logging.debug('on_error(): %s', msg.parse_error())
-        self.streamingEnded = True

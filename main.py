@@ -20,7 +20,7 @@ class Main(object):
         self.data = dict()
         
         os.putenv('GST_DEBUG_DUMP_DOT_DIR',os.getcwd()+'/dot')
-        os.putenv('GST_DEBUG', '2')
+        os.putenv('GST_DEBUG', '1')
         logging.basicConfig(level = logging.INFO)
 
         Gst.init(None)
@@ -32,20 +32,17 @@ class Main(object):
         self.firebaseDatabase.getSongsFiles()
 
     def processInput(self):
-        try:
-            console_input = input("Song code: ")
-            song_name = main.data['songs'][console_input]
-            song_path = main.songsFolder+u'/'+song_name
-            if Path(main.songsFolder+u'/'+song_name).exists():
-                logging.debug("Path: {}".format(song_path))
-                mediaPlayer = MediaPlayer()
-                mediaPlayer.play_sound(song_path, self.onPlayingEnded)
-        except:
-            self.processInput()
-          
-
-    def onPlayingEnded(self):
-        self.processInput()
+        while True:
+            try:
+                console_input = input("Song code: ")
+                song_name = main.data['songs'][console_input]
+                song_path = main.songsFolder+u'/'+song_name
+                if Path(main.songsFolder+u'/'+song_name).exists():
+                    logging.debug("Path: {}".format(song_path))
+                    mediaPlayer = MediaPlayer()
+                    mediaPlayer.play_sound(song_path)
+            except:
+                continue
 
 
 if __name__ == '__main__':
