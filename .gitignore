@@ -102,3 +102,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+*.DS_Store
+
+# Keys
+Keys/*
+test.sh
+*.mp3
