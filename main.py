@@ -18,7 +18,8 @@ class Main(object):
         path = os.path.dirname(os.path.abspath(__file__))
         self.loop = asyncio.get_event_loop()
         self.songsFolder = path+'/songs'
-        self.firebaseDatabase = FirebaseManager(self.songsFolder)
+        self.keysFolder = path+'/Keys'
+        self.firebaseDatabase = FirebaseManager(self.songsFolder, self.keysFolder)
         self.data = dict()
 
         if "-d" in sys.argv:
