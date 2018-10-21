@@ -7,4 +7,4 @@ def getDateTimeString():
 
 def isLinuxOS():
     platformName = platform.system()
-    return platformName.startswith('linux')
+    return platformName.startswith('Linux')

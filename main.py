@@ -15,13 +15,14 @@ from pathlib import Path
 class Main(object):
 
     def __init__(self):
+        path = os.path.dirname(os.path.abspath(__file__))
         self.loop = asyncio.get_event_loop()
-        self.songsFolder = os.getcwd()+'/songs'
+        self.songsFolder = path+'/songs'
         self.firebaseDatabase = FirebaseManager(self.songsFolder)
         self.data = dict()
 
         if "-d" in sys.argv:
-            os.putenv('GST_DEBUG_DUMP_DOT_DIR',os.getcwd()+'/dot')
+            os.putenv('GST_DEBUG_DUMP_DOT_DIR',path+'/dot')
             os.putenv('GST_DEBUG', '1')
             logging.basicConfig(level = logging.INFO)
 
@@ -39,6 +40,9 @@ class Main(object):
                 console_input = input("Song code: ")
                 if console_input == "-":
                     break
+                elif console_input == "*":
+                    self.updateData()
+                    continue
 
                 song_name = main.data['songs'][console_input]
                 song_path = main.songsFolder+u'/'+song_name
@@ -49,12 +53,15 @@ class Main(object):
             except:
                 continue
 
+    def updateData(self):
+        self.loop.run_until_complete(main.fetchData())
+        self.loop.run_until_complete(main.fetchFiles())
+
 
 if __name__ == '__main__':
 
     main = Main()
-    main.loop.run_until_complete(main.fetchData())
-    main.loop.run_until_complete(main.fetchFiles())
+    main.updateData()
 
     if main.data:
         logging.debug("Data: {}".format(main.data))
