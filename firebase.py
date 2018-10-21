@@ -8,15 +8,15 @@ from pathlib import Path
 
 class FirebaseManager(object):
 
-    def __init__(self, songsFolder):
+    def __init__(self, songsFolder, keysFolder):
         '''
         Constructor
         '''
-        with open('Keys/gc_data.json', 'r') as f:
+        with open(keysFolder+'/gc_data.json', 'r') as f:
             self.firebaseData = json.load(f)
 
 
-        self.credential = credentials.Certificate('Keys/gc_key.json')
+        self.credential = credentials.Certificate(keysFolder+'/gc_key.json')
         firebase_admin.initialize_app(self.credential, {
             'storageBucket': '{}.appspot.com'.format(self.firebaseData['cloud_storage']['bucket_name'])
         })
