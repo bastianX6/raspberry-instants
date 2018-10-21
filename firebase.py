@@ -12,7 +12,7 @@ class FirebaseManager(object):
         '''
         Constructor
         '''
-        with open('Keys/gc_data.json', 'r') as f:
+        with open(keysFolder+'/gc_data.json', 'r') as f:
             self.firebaseData = json.load(f)
 
 
