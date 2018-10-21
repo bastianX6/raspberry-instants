@@ -2,6 +2,7 @@ import os
 import gi
 import asyncio
 import logging
+import sys
 
 
 gi.require_version('Gst', '1.0')
@@ -18,10 +19,11 @@ class Main(object):
         self.songsFolder = os.getcwd()+'/songs'
         self.firebaseDatabase = FirebaseManager(self.songsFolder)
         self.data = dict()
-        
-        os.putenv('GST_DEBUG_DUMP_DOT_DIR',os.getcwd()+'/dot')
-        os.putenv('GST_DEBUG', '1')
-        logging.basicConfig(level = logging.INFO)
+
+        if "-d" in sys.argv:
+            os.putenv('GST_DEBUG_DUMP_DOT_DIR',os.getcwd()+'/dot')
+            os.putenv('GST_DEBUG', '1')
+            logging.basicConfig(level = logging.INFO)
 
         Gst.init(None)
 
@@ -52,12 +54,12 @@ if __name__ == '__main__':
 
     main = Main()
     main.loop.run_until_complete(main.fetchData())
-    main.loop.run_until_complete(main.fetchFiles()) 
+    main.loop.run_until_complete(main.fetchFiles())
 
     if main.data:
         logging.debug("Data: {}".format(main.data))
         main.processInput()
-        
+
     else:
         logging.error(u'Data is empty')
 

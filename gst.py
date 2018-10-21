@@ -1,6 +1,7 @@
 import gi
 import logging
 import asyncio
+import Utils
 
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
@@ -23,7 +24,7 @@ class MediaPlayer(object):
         self.bus.connect('sync-message::error', self.__on_error)
         self.pipeline.add(self.binContainer)
         self.streamingEnded = False
-        
+        self.dateTime = Utils.getDateTimeString()
 
     def play_sound(self, fileLocation):
         self.__create_bin__()
@@ -51,13 +52,17 @@ class MediaPlayer(object):
         '''
         # Create elements
         self.__add_element__(GstElementNames.audioconvert, "audioconvert")
-        self.__add_element__(GstElementNames.autoaudiosink, "autoaudiosink")
+        if Utils.isLinuxOS():
+            self.__add_element__(GstElementNames.pulsekink, "audiosink")
+        else:
+            self.__add_element__(GstElementNames.autoaudiosink, "audiosink")
+
         self.__add_element__(GstElementNames.multifilesrc, "filesrc")
         self.__add_element__(GstElementNames.decodebin, "decodebin")
-        
+
         # link elements and set its properties
         self.__link_elements__("filesrc", "decodebin")
-        self.__link_elements__("audioconvert", "autoaudiosink")
+        self.__link_elements__("audioconvert", "audiosink")
 
         #setup observer
         decodebin = self.element_list["decodebin"]
@@ -66,16 +71,16 @@ class MediaPlayer(object):
     def __add_element__(self,factory_name,element_name):
         element = Gst.ElementFactory.make(factory_name,None)
         self.element_list[element_name] = element
-            
+
         #Add to bin
         self.binContainer.add(element)
         return True
-        
+
     def __link_elements__(self,source_name,dest_name):
         source = self.element_list[source_name]
         dest = self.element_list[dest_name]
         source.link(dest)
-            
+
         #Add to tuple list
         the_tuple = (source,dest)
         self.element_tuple_list.append(the_tuple)
@@ -86,7 +91,7 @@ class MediaPlayer(object):
 
     def __on_pad_added_decodebin__(self, element, pad):
         '''
-        Called when decodebin element receives data. This method 
+        Called when decodebin element receives data. This method
         links decodebin with audioconvert and also links audioconvert with autoaudiosink.
 
         Before this method:
@@ -102,8 +107,8 @@ class MediaPlayer(object):
         audioconvert = self.element_list["audioconvert"]
         pad_audioconvert = audioconvert.get_static_pad("sink")
         pad.link(pad_audioconvert)
-        self.__link_elements__("audioconvert", "autoaudiosink")
-        Gst.debug_bin_to_dot_file (self.pipeline,Gst.DebugGraphDetails.ALL, "pipeline_created")
+        self.__link_elements__("audioconvert", "audiosink")
+        Gst.debug_bin_to_dot_file (self.pipeline,Gst.DebugGraphDetails.ALL, "pipeline_created_"+self.dateTime)
 
     # Destroy and unlink pipeline elements
     def __destroy_bin__(self):
@@ -111,14 +116,14 @@ class MediaPlayer(object):
         for key in keys:
             self.__remove_element__(key)
 
-        Gst.debug_bin_to_dot_file (self.pipeline,Gst.DebugGraphDetails.ALL, "pipeline_destroyed")
+        Gst.debug_bin_to_dot_file (self.pipeline,Gst.DebugGraphDetails.ALL, "pipeline_destroyed_"+self.dateTime)
 
     def __remove_element__(self,element_name):
         element = self.element_list[element_name]
         self.element_list.pop(element_name)
-            
+
         self.destroy_element_links(element)
-            
+
         #Remove from bin
         self.binContainer.remove(element)
 
@@ -126,7 +131,7 @@ class MediaPlayer(object):
         for t in self.element_tuple_list:
             source = t[0]
             dest = t[1]
-                
+
             if source == element or dest == element:
                 source.unlink(dest)
                 self.element_tuple_list.remove(t)
@@ -136,22 +141,22 @@ class MediaPlayer(object):
         if msg.type == Gst.MessageType.STATE_CHANGED:
             states = msg.parse_state_changed()
             logging.debug('Old State: %s | New state: %s | State pending: %s', self.parse_state(states[0]), self.parse_state(states[1]), self.parse_state(states[2]))
-            
+
         elif msg.type == Gst.MessageType.STREAM_STATUS:
             stream_status = msg.parse_stream_status()
             logging.debug('Stream Status: %s',stream_status[0])
             logging.debug('Element: %s',stream_status[1])
-            
+
         elif msg.type == Gst.MessageType.WARNING:
             warning = msg.parse_warning()
             logging.warning('Error: %s', warning[0])
             logging.warning('Details: %s', warning[1])
-            
+
         elif msg.type == Gst.MessageType.TAG:
             logging.debug('Tag: %s',msg.parse_tag().to_string())
 
         elif msg.type == Gst.MessageType.EOS:
-            logging.debug("Message: EOS") 
+            logging.debug("Message: EOS")
 
         else:
             logging.debug("Message: %s",msg.type)
@@ -161,24 +166,23 @@ class MediaPlayer(object):
         self.streamingEnded = True
 
     def parse_state(self,gst_state):
-        
         state = ""
-        
+
         if gst_state == Gst.State.VOID_PENDING:
             state = "VOID_PENDING"
-            
+
         elif gst_state == Gst.State.NULL:
             state = "NULL"
-            
+
         elif gst_state == Gst.State.READY:
             state = "READY"
-            
+
         elif gst_state == Gst.State.PAUSED:
             state = "PAUSED"
-            
+
         elif gst_state == Gst.State.PLAYING:
             state = "PLAYING"
-            
+
         return state
 
     def __on_error(self, bus, msg):

@@ -50,5 +50,3 @@ class FirebaseManager(object):
 
         blob.download_to_filename(destination_file_name)
         logging.info('Sound %s downloaded to %s.', source_blob_name, destination_file_name)
-            
-    
