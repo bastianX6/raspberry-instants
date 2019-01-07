@@ -3,12 +3,12 @@ import gi
 import asyncio
 import logging
 import sys
-
+import re
 
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 from gi.repository import GLib
-from gst import MediaPlayer
+from MediaPlayer import MediaPlayer
 from firebase import FirebaseManager
 from pathlib import Path
 
@@ -21,6 +21,8 @@ class Main(object):
         self.keysFolder = path+'/Keys'
         self.firebaseDatabase = FirebaseManager(self.songsFolder, self.keysFolder)
         self.data = dict()
+        self.songsArray = []
+        self.regex = re.compile('[0-9]+', re.IGNORECASE)
 
         if "-d" in sys.argv:
             os.putenv('GST_DEBUG_DUMP_DOT_DIR',path+'/dot')
@@ -35,29 +37,48 @@ class Main(object):
     async def fetchFiles(self):
         self.firebaseDatabase.getSongsFiles()
 
-    def processInput(self):
-        while True:
-            try:
-                console_input = input("Song code: ")
-                if console_input == "-":
-                    break
-                elif console_input == "*":
-                    self.updateData()
-                    continue
+    def readInput(self):
+        inputString = input("Song code:")
 
-                song_name = main.data['songs'][console_input]
-                song_path = main.songsFolder+u'/'+song_name
-                if Path(main.songsFolder+u'/'+song_name).exists():
-                    logging.debug("Path: {}".format(song_path))
-                    mediaPlayer = MediaPlayer()
-                    mediaPlayer.play_sound(song_path)
-            except:
-                continue
+        if inputString == '*':
+            print("Updating database...")
+            self.updateData()
+        elif inputString == '.':
+            print("stopping all sounds...")
+            self.stopAllSongs()
+        elif inputString == '-' :
+            print("Closing application...")
+            return
+        elif self.regex.match(inputString):
+            print("Preparing to play a song: "+inputString)
+            self.playSong(inputString)
+
+        self.readInput()
+
+    def playSong(self, songKey):
+        try:
+            song_name = main.data['songs'][songKey]
+            song_path = main.songsFolder+u'/'+song_name
+            if Path(main.songsFolder+u'/'+song_name).exists():
+                logging.debug("Path: {}".format(song_path))
+                mediaPlayer = MediaPlayer()
+                mediaPlayer.playSound(song_path)
+                self.songsArray.append(mediaPlayer)
+        except:
+            pass
 
     def updateData(self):
-        self.loop.run_until_complete(main.fetchData())
-        self.loop.run_until_complete(main.fetchFiles())
+        try:
+            self.loop.run_until_complete(main.fetchData())
+            self.loop.run_until_complete(main.fetchFiles())
+        except:
+            pass
 
+    def stopAllSongs(self):
+        for mediaPlayer in self.songsArray:
+            logging.debug("Current state for pipeline: {}".format(mediaPlayer.getState()))
+            mediaPlayer.stopSound()
+        self.songsArray.clear()
 
 if __name__ == '__main__':
 
@@ -66,7 +87,7 @@ if __name__ == '__main__':
 
     if main.data:
         logging.debug("Data: {}".format(main.data))
-        main.processInput()
+        main.readInput()
 
     else:
         logging.error(u'Data is empty')

@@ -23,15 +23,19 @@ class MediaPlayer(object):
         self.bus.connect('sync-message::eos', self.__on_eos)
         self.bus.connect('sync-message::error', self.__on_error)
         self.pipeline.add(self.binContainer)
-        self.streamingEnded = False
         self.dateTime = Utils.getDateTimeString()
 
-    def play_sound(self, fileLocation):
+    def playSound(self, fileLocation):
         self.__create_bin__()
         self.__set_property__("filesrc", "location", fileLocation)
         self.__set_property__("filesrc", "stop-index", 0)
         self.pipeline.set_state(Gst.State.PLAYING)
 
+    def stopSound(self):
+        self.__destroy_bin__()
+
+    def getState(self):
+        return self.parse_state(self.pipeline.current_state)
     # private methods
 
     # Create and link pipeline elements
@@ -157,13 +161,13 @@ class MediaPlayer(object):
 
         elif msg.type == Gst.MessageType.EOS:
             logging.debug("Message: EOS")
+            self.stopSound()
 
         else:
             logging.debug("Message: %s",msg.type)
 
     def __on_eos(self, bus, msg):
         self.__destroy_bin__()
-        self.streamingEnded = True
 
     def parse_state(self,gst_state):
         state = ""
