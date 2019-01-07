@@ -3,13 +3,12 @@ import gi
 import asyncio
 import logging
 import sys
-import readchar
 import re
 
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 from gi.repository import GLib
-from gst import MediaPlayer
+from MediaPlayer import MediaPlayer
 from firebase import FirebaseManager
 from pathlib import Path
 
@@ -22,6 +21,7 @@ class Main(object):
         self.keysFolder = path+'/Keys'
         self.firebaseDatabase = FirebaseManager(self.songsFolder, self.keysFolder)
         self.data = dict()
+        self.songsArray = []
         self.regex = re.compile('[0-9]+', re.IGNORECASE)
 
         if "-d" in sys.argv:
@@ -37,28 +37,23 @@ class Main(object):
     async def fetchFiles(self):
         self.firebaseDatabase.getSongsFiles()
 
-    def startReading(self):
-        print("Song code:")
-        bufferString = readchar.readkey()
-        bufferString += readchar.readkey()
+    def readInput(self):
+        inputString = input("Song code:")
 
-        if bufferString.startswith("0"):
-            bufferString = bufferString[1:]
-
-        self.processBuffer(bufferString)
-
-    def processBuffer(self, inputString):
-        if inputString == '**':
+        if inputString == '*':
             print("Updating database...")
             self.updateData()
-        elif inputString == '--' :
+        elif inputString == '.':
+            print("stopping all sounds...")
+            self.stopAllSongs()
+        elif inputString == '-' :
             print("Closing application...")
             return
         elif self.regex.match(inputString):
             print("Preparing to play a song: "+inputString)
             self.playSong(inputString)
 
-        self.startReading()
+        self.readInput()
 
     def playSong(self, songKey):
         try:
@@ -67,7 +62,8 @@ class Main(object):
             if Path(main.songsFolder+u'/'+song_name).exists():
                 logging.debug("Path: {}".format(song_path))
                 mediaPlayer = MediaPlayer()
-                mediaPlayer.play_sound(song_path)
+                mediaPlayer.playSound(song_path)
+                self.songsArray.append(mediaPlayer)
         except:
             pass
 
@@ -78,6 +74,11 @@ class Main(object):
         except:
             pass
 
+    def stopAllSongs(self):
+        for mediaPlayer in self.songsArray:
+            logging.debug("Current state for pipeline: {}".format(mediaPlayer.getState()))
+            mediaPlayer.stopSound()
+        self.songsArray.clear()
 
 if __name__ == '__main__':
 
@@ -86,7 +87,7 @@ if __name__ == '__main__':
 
     if main.data:
         logging.debug("Data: {}".format(main.data))
-        main.startReading()
+        main.readInput()
 
     else:
         logging.error(u'Data is empty')
