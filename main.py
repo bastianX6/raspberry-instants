@@ -26,7 +26,7 @@ class Main(object):
 
         if "-d" in sys.argv:
             os.putenv('GST_DEBUG_DUMP_DOT_DIR',path+'/dot')
-            os.putenv('GST_DEBUG', '1')
+            os.putenv('GST_DEBUG', '3')
             logging.basicConfig(level = logging.INFO)
 
         Gst.init(None)
@@ -38,7 +38,7 @@ class Main(object):
         self.firebaseDatabase.getSongsFiles()
 
     def readInput(self):
-        inputString = input("Song code:")
+        inputString = input("Song code: ")
 
         if inputString == '*':
             print("Updating database...")
@@ -57,15 +57,18 @@ class Main(object):
 
     def playSong(self, songKey):
         try:
-            song_name = main.data['songs'][songKey]
-            song_path = main.songsFolder+u'/'+song_name
-            if Path(main.songsFolder+u'/'+song_name).exists():
-                logging.debug("Path: {}".format(song_path))
-                mediaPlayer = MediaPlayer()
-                mediaPlayer.playSound(song_path)
-                self.songsArray.append(mediaPlayer)
+            songName = self.data['songs'][songKey]
+            songPath = self.songsFolder+'/'+songName
+            if Path(songPath).exists():
+                self.playSongWithPath(songPath)
         except:
             pass
+
+    def playSongWithPath(self, songPath):
+        logging.debug("Path: {}".format(songPath))
+        mediaPlayer = MediaPlayer()
+        mediaPlayer.playSound(songPath)
+        self.songsArray.append(mediaPlayer)
 
     def updateData(self):
         try:
@@ -87,9 +90,10 @@ if __name__ == '__main__':
 
     if main.data:
         logging.debug("Data: {}".format(main.data))
+        main.playSongWithPath(main.songsFolder+'/init.mp3')
         main.readInput()
 
     else:
-        logging.error(u'Data is empty')
+        logging.error('Data is empty')
 
 
