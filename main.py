@@ -127,7 +127,13 @@ if __name__ == '__main__':
 
     if soundApp.data:
         logging.debug("Data: {}".format(soundApp.data))
-        app.run(debug=True, host='0.0.0.0', port=8081)
+        if "-l" in sys.argv[1:]:
+            logging.info('Running in http listening mode')
+            app.run(debug=True, host='0.0.0.0', port=8080)
+        else:
+            logging.info('Running in local mode')
+            soundApp.playSongWithPath(soundApp.songsFolder+'/init.mp3')
+            soundApp.readInput()
     else:
         logging.error('Data is empty')
 
