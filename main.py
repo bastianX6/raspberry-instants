@@ -120,7 +120,7 @@ def reload():
 @app.route('/list', methods=['GET'])
 def list():
     print("Listing songs...")
-    return jsonResponse(soundApp.data)
+    return jsonResponse(soundApp.data["songs"])
 
 if __name__ == '__main__':
     soundApp.updateData()
