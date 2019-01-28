@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
     if soundApp.data:
         logging.debug("Data: {}".format(soundApp.data))
-        if "-l" in sys.argv[1:]:
+        if "--http" in sys.argv[1:]:
             logging.info('Running in http listening mode')
             app.run(debug=True, host='0.0.0.0', port=8080)
         else:
