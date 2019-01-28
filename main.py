@@ -76,7 +76,7 @@ class Main(object):
             self.loop.run_until_complete(soundApp.fetchData())
             self.loop.run_until_complete(soundApp.fetchFiles())
         except Exception as e:
-            print("\n\nbroma: {}\n\n".format(e))
+            logging.debug("Exception updating data: {}".format(e))
             pass
 
     def stopAllSongs(self):
@@ -89,32 +89,44 @@ class Main(object):
 app = Flask(__name__)
 soundApp = Main()
 
-@app.route('/<actionID>', methods=['GET'])
-def action(actionID):
-    if actionID == '*':
-        print("Updating database...")
-        soundApp.updateData()
-    elif actionID == '.':
-        print("stopping all sounds...")
-        soundApp.stopAllSongs()
-    elif actionID == '-' :
-        print("Closing application...")
-        return
-    elif soundApp.regex.match(actionID):
-        print("Preparing to play a song: "+actionID)
-        soundApp.playSong(actionID)
+def emptyResponse():
+    return json.dumps("{}"), 204, {}
+
+def jsonResponse(data):
     headers = {
         "Content-Type": "application/json",
     }
-    return json.dumps("{}"), 204, headers
+    return json.dumps(data), 200, headers
+
+@app.route('/play/<soundID>', methods=['GET'])
+def play(soundID):
+    if soundApp.regex.match(soundID):
+        print("Preparing to play a song: "+soundID)
+        soundApp.playSong(soundID)
+    return emptyResponse()
+
+@app.route('/stop', methods=['GET'])
+def stop():
+    print("stopping all sounds...")
+    soundApp.stopAllSongs()
+    return emptyResponse()
+
+@app.route('/reload', methods=['GET'])
+def reload():
+    print("Updating database...")
+    soundApp.updateData()
+    return emptyResponse()
+
+@app.route('/list', methods=['GET'])
+def list():
+    print("Listing songs...")
+    return jsonResponse(soundApp.data)
 
 if __name__ == '__main__':
     soundApp.updateData()
 
     if soundApp.data:
         logging.debug("Data: {}".format(soundApp.data))
-        soundApp.playSongWithPath(soundApp.songsFolder+'/init.mp3')
-        #main.readInput()
         app.run(debug=True, host='0.0.0.0', port=8081)
     else:
         logging.error('Data is empty')
