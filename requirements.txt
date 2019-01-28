@@ -1,0 +1,4 @@
+requests==2.19.0
+python-firebase
+firebase-admin
+google-cloud-firestore
