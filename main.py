@@ -11,6 +11,7 @@ from gi.repository import GLib
 from MediaPlayer import MediaPlayer
 from firebase import FirebaseManager
 from pathlib import Path
+from flask import Flask, json, request
 
 class Main(object):
 
@@ -72,9 +73,10 @@ class Main(object):
 
     def updateData(self):
         try:
-            self.loop.run_until_complete(main.fetchData())
-            self.loop.run_until_complete(main.fetchFiles())
-        except:
+            self.loop.run_until_complete(soundApp.fetchData())
+            self.loop.run_until_complete(soundApp.fetchFiles())
+        except Exception as e:
+            print("\n\nbroma: {}\n\n".format(e))
             pass
 
     def stopAllSongs(self):
@@ -83,17 +85,37 @@ class Main(object):
             mediaPlayer.stopSound()
         self.songsArray.clear()
 
+
+app = Flask(__name__)
+soundApp = Main()
+
+@app.route('/<actionID>', methods=['GET'])
+def action(actionID):
+    if actionID == '*':
+        print("Updating database...")
+        soundApp.updateData()
+    elif actionID == '.':
+        print("stopping all sounds...")
+        soundApp.stopAllSongs()
+    elif actionID == '-' :
+        print("Closing application...")
+        return
+    elif soundApp.regex.match(actionID):
+        print("Preparing to play a song: "+actionID)
+        soundApp.playSong(actionID)
+    headers = {
+        "Content-Type": "application/json",
+    }
+    return json.dumps("{}"), 204, headers
+
 if __name__ == '__main__':
+    soundApp.updateData()
 
-    main = Main()
-    main.updateData()
-
-    if main.data:
-        logging.debug("Data: {}".format(main.data))
-        main.playSongWithPath(main.songsFolder+'/init.mp3')
-        main.readInput()
-
+    if soundApp.data:
+        logging.debug("Data: {}".format(soundApp.data))
+        soundApp.playSongWithPath(soundApp.songsFolder+'/init.mp3')
+        #main.readInput()
+        app.run(debug=True, host='0.0.0.0', port=8081)
     else:
         logging.error('Data is empty')
-
 
