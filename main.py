@@ -11,6 +11,7 @@ from gi.repository import GLib
 from MediaPlayer import MediaPlayer
 from firebase import FirebaseManager
 from pathlib import Path
+from flask import Flask, json, request
 
 class Main(object):
 
@@ -72,9 +73,10 @@ class Main(object):
 
     def updateData(self):
         try:
-            self.loop.run_until_complete(main.fetchData())
-            self.loop.run_until_complete(main.fetchFiles())
-        except:
+            self.loop.run_until_complete(soundApp.fetchData())
+            self.loop.run_until_complete(soundApp.fetchFiles())
+        except Exception as e:
+            logging.debug("Exception updating data: {}".format(e))
             pass
 
     def stopAllSongs(self):
@@ -83,17 +85,55 @@ class Main(object):
             mediaPlayer.stopSound()
         self.songsArray.clear()
 
+
+app = Flask(__name__)
+soundApp = Main()
+
+def emptyResponse():
+    return json.dumps("{}"), 204, {}
+
+def jsonResponse(data):
+    headers = {
+        "Content-Type": "application/json",
+    }
+    return json.dumps(data), 200, headers
+
+@app.route('/play/<soundID>', methods=['GET'])
+def play(soundID):
+    if soundApp.regex.match(soundID):
+        print("Preparing to play a song: "+soundID)
+        soundApp.playSong(soundID)
+    return emptyResponse()
+
+@app.route('/stop', methods=['GET'])
+def stop():
+    print("stopping all sounds...")
+    soundApp.stopAllSongs()
+    return emptyResponse()
+
+@app.route('/reload', methods=['GET'])
+def reload():
+    print("Updating database...")
+    soundApp.updateData()
+    return emptyResponse()
+
+@app.route('/list', methods=['GET'])
+def list():
+    print("Listing songs...")
+    return jsonResponse(soundApp.data["songs"])
+
 if __name__ == '__main__':
+    soundApp.updateData()
 
-    main = Main()
-    main.updateData()
-
-    if main.data:
-        logging.debug("Data: {}".format(main.data))
-        main.playSongWithPath(main.songsFolder+'/init.mp3')
-        main.readInput()
-
+    if soundApp.data:
+        logging.debug("Data: {}".format(soundApp.data))
+        if "--http" in sys.argv[1:]:
+            logging.info('Running in http listening mode')
+            app.run(debug=True, host='0.0.0.0', port=8080)
+        else:
+            logging.info('Running in local mode')
+            soundApp.playSongWithPath(soundApp.songsFolder+'/init.mp3')
+            soundApp.readInput()
     else:
         logging.error('Data is empty')
-
 

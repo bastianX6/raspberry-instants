@@ -1,4 +1,5 @@
 requests==2.19.0
+flask
 python-firebase
 firebase-admin
 google-cloud-firestore
