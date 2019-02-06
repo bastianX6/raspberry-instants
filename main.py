@@ -119,6 +119,12 @@ def stop():
 @app.route('/reload', methods=['GET'])
 @cross_origin()
 def reload():
+    print("reloading pulseaudio...")
+    os.system("pulseaudio -k")
+    os.system("pulseaudio -D")
+    print("reloading soundApp")
+    del soundApp
+    soundApp = Main()
     print("Updating database...")
     soundApp.updateData()
     return emptyResponse()
