@@ -33,6 +33,9 @@ class MediaPlayer(object):
 
     def stopSound(self):
         self.__destroy_bin__()
+        self.pipeline = None
+        self.binContainer = None
+        self.bus = None
 
     def getState(self):
         return self.parse_state(self.pipeline.current_state)
@@ -119,8 +122,6 @@ class MediaPlayer(object):
         keys = list(self.element_list.keys())
         for key in keys:
             self.__remove_element__(key)
-
-        Gst.debug_bin_to_dot_file (self.pipeline,Gst.DebugGraphDetails.ALL, "pipeline_destroyed_"+self.dateTime)
 
     def __remove_element__(self,element_name):
         element = self.element_list[element_name]

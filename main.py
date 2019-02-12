@@ -82,8 +82,12 @@ class Main(object):
 
     def stopAllSongs(self):
         for mediaPlayer in self.songsArray:
-            logging.debug("Current state for pipeline: {}".format(mediaPlayer.getState()))
-            mediaPlayer.stopSound()
+            try:
+                mediaPlayer.stopSound()
+            except Exception as e:
+                logging.debug("Exception stopping sound: {}".format(e))
+                pass
+
         self.songsArray.clear()
 
 
