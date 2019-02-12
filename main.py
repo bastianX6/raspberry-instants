@@ -8,7 +8,7 @@ import re
 gi.require_version('Gst', '1.0')
 from gi.repository import Gst
 from gi.repository import GLib
-from MediaPlayer2 import MediaPlayer2
+from MediaPlayer import MediaPlayer
 from firebase import FirebaseManager
 from pathlib import Path
 from flask import Flask, json, request
@@ -68,7 +68,7 @@ class Main(object):
 
     def playSongWithPath(self, songPath):
         logging.debug("Path: {}".format(songPath))
-        mediaPlayer = MediaPlayer2(songPath)
+        mediaPlayer = MediaPlayer(songPath)
         mediaPlayer.playSound()
         self.songsArray.append(mediaPlayer)
 
