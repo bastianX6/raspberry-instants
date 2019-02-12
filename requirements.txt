@@ -1,5 +1,6 @@
-requests==2.19.0
+requests>=2.20.0
 flask
+flask-cors
 python-firebase
 firebase-admin
 google-cloud-firestore

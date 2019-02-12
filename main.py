@@ -12,6 +12,7 @@ from MediaPlayer import MediaPlayer
 from firebase import FirebaseManager
 from pathlib import Path
 from flask import Flask, json, request
+from flask_cors import CORS, cross_origin
 
 class Main(object):
 
@@ -87,6 +88,8 @@ class Main(object):
 
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 soundApp = Main()
 
 def emptyResponse():
@@ -99,6 +102,7 @@ def jsonResponse(data):
     return json.dumps(data), 200, headers
 
 @app.route('/play/<soundID>', methods=['GET'])
+@cross_origin()
 def play(soundID):
     if soundApp.regex.match(soundID):
         print("Preparing to play a song: "+soundID)
@@ -106,18 +110,21 @@ def play(soundID):
     return emptyResponse()
 
 @app.route('/stop', methods=['GET'])
+@cross_origin()
 def stop():
     print("stopping all sounds...")
     soundApp.stopAllSongs()
     return emptyResponse()
 
 @app.route('/reload', methods=['GET'])
+@cross_origin()
 def reload():
     print("Updating database...")
     soundApp.updateData()
     return emptyResponse()
 
 @app.route('/list', methods=['GET'])
+@cross_origin()
 def list():
     print("Listing songs...")
     return jsonResponse(soundApp.data["songs"])
