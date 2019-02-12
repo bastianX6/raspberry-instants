@@ -1,6 +1,5 @@
 import gi
 import logging
-import asyncio
 import Utils
 
 gi.require_version('Gst', '1.0')
