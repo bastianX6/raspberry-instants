@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Node.JS (local)",
             "type": "node",
-            "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/shell"
+            "request": "attach",
+            "port": 5858
         }
     ]
 }

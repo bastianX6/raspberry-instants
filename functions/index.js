@@ -7,40 +7,24 @@ admin.initializeApp(functions.config().firebase);
 
 var db = admin.firestore();
 
-app.post('/song', (req, res) => {
-
+app.post('/song/add', (req, res) => {
     var Validator = require('jsonschema').Validator;
     var v = new Validator();
-    var songSchema = {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "id": "songSchema",
-        "type": "object",
-        "properties": {
-            "songCode": {"type": "string"},
-            "description": {"type": "string"},
-            "songName": {"type": "string"},
-            "public": {"type": "boolean"},
-        },
-        "required": [
-            "songCode", "songName", "public", "description"
-        ]
-    };
-
-    var song = req.body;
-    var isValid = v.validate(req.body, songSchema).valid;
-    if(isValid) {
-        db.collection("songs2").add(req.body)
-        .then( ref => { 
-            return res.status(201).json("Song added successfully");
-        }).catch( err => {
-            return res.status(400).json("Error: "+err);
-        });
-    } else {
-        res.status(400).json("Invalid JSON");
+    var songSchema = require("./schemas/songSchema.json");
+    var jsonIsValid = v.validate(req.body, songSchema).valid;
+    if(!jsonIsValid) {
+        return res.status(400).json("Invalid JSON");
     }
+    var song = req.body;
+    db.collection("songs2").add(req.body)
+    .then( ref => {
+        return res.status(201).json("Song added successfully");
+    }).catch( err => {
+        return res.status(400).json("Error: "+err);
+    });
 });
 
-app.get('/songs', (req, res) => {
+app.get('/song/list', (req, res) => {
     db.collection("songs2").where("public", "==", true).get()
     .then( snapshot => {
         var docData = snapshot.docs.map( doc => {

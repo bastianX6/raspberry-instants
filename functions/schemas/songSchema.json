@@ -1,0 +1,14 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "id": "songSchema",
+    "type": "object",
+    "properties": {
+        "songCode": {"type": "string"},
+        "description": {"type": "string"},
+        "songName": {"type": "string"},
+        "public": {"type": "boolean"}
+    },
+    "required": [
+        "songCode", "songName", "public", "description"
+    ]
+}
