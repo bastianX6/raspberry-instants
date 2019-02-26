@@ -132,7 +132,7 @@ def reload():
 @cross_origin()
 def list():
     print("Listing songs...")
-    return jsonResponse(soundApp.data["songs"])
+    return jsonResponse(soundApp.data)
 
 @app.route('/clock', methods=['GET'])
 @cross_origin()

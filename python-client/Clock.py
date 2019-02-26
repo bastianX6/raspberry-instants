@@ -23,7 +23,7 @@ class Clock(object):
         elif now.hour > 0 and now.hour < 10:
             timeDict["hour"] = "10{}".format(now.hour)
         else:
-            timeDict["hour"] = now.hour
+            timeDict["hour"] = "1{}".format(now.hour)
 
         return timeDict
 
