@@ -60,7 +60,7 @@ class Main(object):
 
     def playSong(self, songKey):
         try:
-            songName = self.data['songs'][songKey]
+            songName = self.data[songKey]
             songPath = self.songsFolder+'/'+songName
             if Path(songPath).exists():
                 self.playSongWithPath(songPath)
