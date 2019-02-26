@@ -26,9 +26,13 @@ class FirebaseManager(object):
         self.songsFolder = songsFolder
 
     def getData(self):
-        docs = self.songsReference.order_by(self.firebaseData['firestore']['field_name']).limit(1).get()
+        docs = self.songsReference.get()
+        data = dict()
         for doc in docs:
-            return doc.to_dict()
+            documentDict =  doc.to_dict()
+            logging.debug("documentDict: {}".format(documentDict))
+            data[documentDict["songCode"]] = documentDict["songName"]
+        return data
 
     def getSongsFiles(self):
         prefix = self.firebaseData['cloud_storage']['file_prefix']

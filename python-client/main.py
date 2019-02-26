@@ -10,6 +10,7 @@ from gi.repository import Gst
 from gi.repository import GLib
 from MediaPlayer import MediaPlayer
 from firebase import FirebaseManager
+from Clock import Clock
 from pathlib import Path
 from flask import Flask, json, request
 from flask_cors import CORS, cross_origin
@@ -132,6 +133,17 @@ def reload():
 def list():
     print("Listing songs...")
     return jsonResponse(soundApp.data["songs"])
+
+@app.route('/clock', methods=['GET'])
+@cross_origin()
+def readClock():
+    print("playing clock...")
+    clock = Clock()
+    clockDict = clock.getClockCodes()
+    clockMediaPlayer = clock.getClockMediaPlayer(soundApp.data, soundApp.songsFolder)
+    soundApp.songsArray.append(clockMediaPlayer)
+    clockMediaPlayer.playSound()
+    return emptyResponse()
 
 if __name__ == '__main__':
     soundApp.updateData()

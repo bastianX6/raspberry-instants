@@ -1,0 +1,30 @@
+{
+    // Use IntelliSense para saber los atributos posibles.
+    // Mantenga el puntero para ver las descripciones de los existentes atributos 
+    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Python: Main.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "stopOnEntry": true,
+            "args": ["-d"],
+            "pythonPath": "/usr/local/bin/python3"
+        },
+        {
+            "name": "Python: Main.py Http",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": ["--http", "-d"],
+            "stopOnEntry": true,
+            "pythonPath": "/usr/local/bin/python3"
+
+        }
+    ]
+}
