@@ -13,10 +13,11 @@ class Clock(object):
         now = datetime.datetime.now()
         timeDict = dict()
 
-        if now.minute >0 and now.minute < 10:
-            timeDict["minute"] = "10{}".format(now.minute)
-        else:
-            timeDict["minute"] = "1{}".format(now.minute)
+        if now.minute >0:
+            if now.minute < 10:
+                timeDict["minute"] = "10{}".format(now.minute)
+            else:
+                timeDict["minute"] = "1{}".format(now.minute)
 
         if now.hour == 0:
             timeDict["hour"] = "100"
